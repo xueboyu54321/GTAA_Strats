@@ -10,6 +10,7 @@ import sys
 import momemtum as mo
 import backtest as bt
 import datetime as dt
+import efficient_frontier as ef
 class MyStrategy():
     def __init__(self, args):
         self.file_path = args.file_path
@@ -30,6 +31,7 @@ class MyStrategy():
         self.data.index=pd.to_datetime(self.data.index,format='%m/%d/%Y')
         self.Libor = self.data['1m-Libor']
         self.data = self.data.drop('1m-Libor',1)
+        self.date = self.data.index.to_list()
 
     def get_assets(self,date):
         sig = self.signal.loc[date]
@@ -68,7 +70,7 @@ class MyStrategy():
 
                 l_weight = pd.concat([stock_l,bond_l,commo_l])
                 s_weight = pd.concat([stock_s,bond_s,commo_s])
-                return l_weight, s_weight
+                return np.abs(l_weight),np.abs(s_weight)
 
             else:
                 l,s = assets
@@ -77,25 +79,85 @@ class MyStrategy():
                 s-=median
                 l_weight = l/l.sum()
                 s_weight = s/s.sum()
-                return l_weight,s_weight
+                return np.abs(l_weight),np.abs(s_weight)
 
 
         elif self.weight == "ef":
             if self.diversify:
-                pass
+                stock_l,stock_s = assets[0]
+                bond_l , bond_s = assets[1]
+                commo_l,commo_s = assets[2]
+                stock_list = pd.concat([stock_l,stock_s]).index.to_list()
+                bond_list = pd.concat([bond_l,bond_s]).index.to_list()
+                commo_list = pd.concat([commo_l,commo_s]).index.to_list()
+
+                end_date = stock_l.name
+                start_date = self.date[self.date.index(end_date)-30]
+
+                stock_data = self.data.loc[start_date:end_date][stock_list]
+                stock_weight,stock_P,stock_ret,stock_vol = ef.get_weights(stock_data)
+                stock_l_weight = stock_weight.loc[stock_weight>0]
+                stock_s_weight = stock_weight.loc[stock_weight<0]
+
+                bond_data = self.data.loc[start_date:end_date][bond_list]
+                bond_weight,bond_P,bond_ret,bond_vol = ef.get_weights(bond_data)
+                bond_l_weight = bond_weight.loc[bond_weight>0]
+                bond_s_weight = bond_weight.loc[bond_weight<0]
+
+                commo_data = self.data.loc[start_date:end_date][commo_list]
+                commo_weight,commo_P,stock_ret,commo_vol = ef.get_weights(commo_data)
+                commo_l_weight = commo_weight.loc[commo_weight>0]
+                commo_s_weight = commo_weight.loc[commo_weight<0]
+
+                l_weight = pd.concat([stock_l_weight,bond_l_weight,commo_l_weight])
+                s_weight = pd.concat([stock_s_weight,bond_s_weight,commo_s_weight])
+
+                fig, axs = plt.subplots(2, 2)
+                axs[0,0].scatter(stock_P[1],stock_P[0],c='r',marker='^',label='Maximum Sharpe Ratio')
+                axs[0,0].scatter(stock_vol, stock_ret, s = 4, c = 'g', marker = '.', label = 'Stock Efficient Frontier')
+                axs[0,0].set_title('EfficientFrontier')
+                axs[0,0].set_xlabel('Annualized Volatility')
+                axs[0,0].set_ylabel('Annualized Return')
+                axs[0,0].legend()
+
+                axs[0,1].scatter(bond_P[1],bond_P[0],c='r',marker='^',label='Maximum Sharpe Ratio')
+                axs[0,1].scatter(bond_vol, bond_ret, s = 4, c = 'g', marker = '.', label = 'Bond Efficient Frontier')
+                axs[0,1].set_title('EfficientFrontier')
+                axs[0,1].set_xlabel('Annualized Volatility')
+                axs[0,1].set_ylabel('Annualized Return')
+                axs[0,1].legend()
+
+                axs[1,0].scatter(commo_P[1],commo_P[0],c='r',marker='^',label='Maximum Sharpe Ratio')
+                axs[1,0].scatter(commo_vol, commo_ret, s = 4, c = 'g', marker = '.', label = 'Stock Efficient Frontier')
+                axs[1,0].set_title('EfficientFrontier')
+                axs[1,0].set_xlabel('Annualized Volatility')
+                axs[1,0].set_ylabel('Annualized Return')
+                axs[1,0].legend()
+
+                fig.savefig("./dump/EfficientFrontier.jpg")
+
+                return np.abs(l_weight),np.abs(s_weight)
 
             else:
                 l,s = assets
                 asset_list = pd.concat([l,s]).index.to_list()
                 end_date = l.name
-                start_date = end_date-dt.timedelta(30)
+                start_date = self.date[self.date.index(end_date)-30]
                 data = self.data.loc[start_date:end_date][asset_list]
-                
+                weight,P,ret,vol = ef.get_weights(data)
+                l_weight = weight.loc[weight>0]
+                s_weight = weight.loc[weight<0]
 
+                plt.scatter(P[1],P[0],c='r',marker='^',label='Maximum Sharpe Ratio')
+                plt.scatter(vol, ret, s = 4, c = 'g', marker = '.', label = 'Efficient Frontier')
+                plt.title('EfficientFrontier')
+                plt.xlabel('Annualized Volatility')
+                plt.ylabel('Annualized Return')
+                plt.legend()
+                plt.savefig("./dump/EfficientFrontier.jpg")
 
+                return np.abs(l_weight),np.abs(s_weight)
 
-
-            pass
         else:
             sys.exit("Weighting method can only be 'signal' or 'ef', program terminated!\n ")
 
