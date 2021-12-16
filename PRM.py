@@ -105,11 +105,9 @@ def MontC(mu,e_cov,prices):               #mu and sigma are arrays!
     ndata       = np.shape(prices)[1]
     yearly_return  = np.zeros((ndata,N))
     mPad          = np.zeros((ndata,total_steps))
-
     #Build Up mPad Array
     for i in range (total_steps):
         mPad[:,i]     = mu[:]
-
 
 # Create the Monte Carlo simulated runs
     for n in range(N):
@@ -117,26 +115,8 @@ def MontC(mu,e_cov,prices):               #mu and sigma are arrays!
         # Gaussian is assumed
         correlated_randomness = e_cov @ norm.rvs(size = (ndata,total_steps))
         # Adjust simulated path by number of total_steps and mean of returns
-
         daily_return = mPad * (1/total_steps) + correlated_randomness * np.sqrt(1/total_steps)
-
         yearly_return[:, n] =  daily_return.sum(axis=1)
-
-    ''' Code for DeBug    Ignore it for normal run!!
-    print(np.shape(yearly_return))
-    fig = plt.figure(figsize=(10,10),facecolor='white')
-    ax0 = fig.add_subplot(221)
-    ax1 = fig.add_subplot(222)
-    ax2 = fig.add_subplot(223)
-    ax3 = fig.add_subplot(224)
-    fig.tight_layout()
-    ax0.hist(yearly_return[0],bins=100)
-    ax1.hist(yearly_return[1],bins=100)
-    ax2.hist(yearly_return[2],bins=100)
-    ax3.hist(yearly_return[3],bins=100)
-    plt.show()
-    quit()
-    '''
 
     Mu  = np.average(yearly_return,axis=1)
     Cov = np.cov(yearly_return)
@@ -193,8 +173,6 @@ def main(args):
         mu[:]=mean_returns[:]
         mean_returns=mu
 
-
-
 # Calculate the weights
     if OptMet=='MPT':
 
@@ -206,8 +184,6 @@ def main(args):
             ef1=EfficientFrontier(mean_returns,efficient_cov)
             ef2=EfficientFrontier(mean_returns,efficient_cov)
             ef3=EfficientFrontier(mean_returns,efficient_cov)
-
-
 
         print('==============MPT Results==============\n')
     # Maximizing the Sharpe's Ratio
@@ -234,7 +210,6 @@ def main(args):
         plt.ylabel('Annualized Return')
         plt.legend()
         plt.show()
-
 
     elif OptMet=='CVaR':
         print('CVaR Method is not Available yet! Please wait for the updates')
