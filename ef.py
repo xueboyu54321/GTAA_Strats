@@ -20,19 +20,19 @@ import sys
 def MPT_sharpe(ef):
     wSharpe=ef.max_sharpe()
     clean_weights=ef.clean_weights()
-    P=ef.portfolio_performance(verbose=True)
+    P=ef.portfolio_performance(verbose=False)
     return pd.Series(clean_weights),P
 
 def MPT_return(ef,target):
     wReturn=ef.efficient_return(target_return=target)
     clean_weights=ef.clean_weights()
-    P=ef.portfolio_performance(verbose=True)
+    P=ef.portfolio_performance(verbose=False)
     return pd.Series(clean_weights),P
 
 def MPT_vol(ef):
     wVol=ef.min_volatility()
     clean_weights=ef.clean_weights()
-    P=ef.portfolio_performance(verbose=True)
+    P=ef.portfolio_performance(verbose=False)
     return pd.Series(clean_weights),P
 
 #------------------------------------End-----------------------------------
@@ -71,12 +71,11 @@ def get_weights(prices):
 # Calculate the weights
     ef1=EfficientFrontier(mean_returns,efficient_cov,weight_bounds=(-1,1))
 
-    print('==============MPT Results==============\n')
+
 # Maximizing the Sharpe's Ratio
 
     weight,P=MPT_sharpe(ef1)
 
-    print('===================================\n')
 
 # Construct the Efficient Frontier Curve
     cla = CLA(mean_returns, efficient_cov)

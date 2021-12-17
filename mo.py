@@ -18,8 +18,8 @@ def get_stocks(sig, quantile):
     s = sig.quantile(quantile)
 
     l = sig.loc[sig>l]
-    s = sig.loc[sig<s]    
+    s = sig.loc[sig<s]
     
-    return l,s
+    return l,s #two series
 
 
