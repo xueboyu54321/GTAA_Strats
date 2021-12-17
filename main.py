@@ -49,7 +49,11 @@ if __name__ == '__main__':                       # If this file is called from c
     strat = MyStrategy(args)                     # Define MyStrategy Object
     strat.back_test()                            # Do backtest
     plot.plot(strat)                             # Plot the return
-    strat.get_stats()                            # Get Statistics
+    msg = strat.get_stats()                      # Get Statistics
     plot.normal_fit(strat)                       # Check Normality
     drawdown = plot.max_drawdown(strat)          # Plot the Drawdown
     print("Maximum Drawdown"+str(drawdown)+"\n")
+    msg += "Maximum Drawdown"+str(drawdown)+"\n"
+    result_analysis = open("./dump/result_analysis.txt", "w")
+    n = result_analysis.write(msg)
+    result_analysis.close()

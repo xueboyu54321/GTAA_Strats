@@ -5,7 +5,6 @@ import mo
 import datetime as dt
 import ef
 import matplotlib.pyplot as plt
-import stats
 import scipy as sp
 import plot
 class MyStrategy():
@@ -211,4 +210,11 @@ class MyStrategy():
         print("kurtosis:"+str(round(kurtosis,1))+"\n")
         print("Correlation with Benchmark:"+str(round(corr,2))+"\n")
         print("Beta:"+str(round(beta,2))+"\n")
-        return
+        msg = "Average Daily Return:"+str(round(ave_ret*100,2))+"%\n"
+        msg +="Daily Volatility:"+str(round(vol*100,2))+"%\n"
+        msg += "Daily 99% VaR:"+str(round(VaR*100,2))+"%\n"
+        msg += "Sharpe Ratio:"+str(round(Sharpe,1))+"\n"
+        msg += "kurtosis:"+str(round(kurtosis,1))+"\n"
+        msg += "Correlation with Benchmark:"+str(round(corr,2))+"\n"
+        msg += "Beta:"+str(round(beta,2))+"\n"
+        return msg

@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Wed Dec 15 12:26:39 2021
+Data Cleaning
+author: Boyu Xue
 
-@author: xueboyu
+Warning:
+Coding for data cleaning
+No Use for now
+Please ignore!!!
 """
 import pandas as pd
 import numpy as np
@@ -24,7 +28,7 @@ for i in range(1,len(data_list)):
     name = data_list[i]
     temp = pd.read_csv('/Users/xueboyu/Desktop/GTAA/Data/'+ name)[['Date','Close']].rename(columns={'Close':name[:-4]})
     temp['Date']=pd.to_datetime(temp['Date'],format='%m/%d/%Y')
-    data = data.merge(temp,on='Date' ,how='inner')    
+    data = data.merge(temp,on='Date' ,how='inner')
 
 data.set_index('Date')
 

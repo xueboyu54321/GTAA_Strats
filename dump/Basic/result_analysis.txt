@@ -1,0 +1,8 @@
+Average Daily Return:0.01%
+Daily Volatility:0.73%
+Daily 99% VaR:-1.86%
+Sharpe Ratio:-14.0
+kurtosis:14.3
+Correlation with Benchmark:-0.22
+Beta:-0.15
+Maximum Drawdown-0.21
