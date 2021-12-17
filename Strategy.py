@@ -38,13 +38,15 @@ class MyStrategy():
         self.read_data()
         self.signal    = mo.get_signal(self.data,22)                # Generate Siganl
         self.signal_date=self.signal.index.to_list()                # The list of dates correponding with signals
-        self.benchmark = self.data['SPY'].loc[self.signal_date[0]:] #Get Benchmark
+        self.benchmark = self.benchmark.loc[self.signal_date[0]:] #Get Benchmark
     def read_data(self):
     # Collect data
         self.data = pd.read_csv(self.file_path,index_col=0)
         self.data.index=pd.to_datetime(self.data.index,format='%m/%d/%Y')
         self.Libor = self.data['1m-Libor']
         self.data = self.data.drop('1m-Libor',1)
+        self.benchmark = self.data['Benchmark']
+        self.data = self.data.drop('Benchmark',1)
         self.date = self.data.index.to_list()
 
     def get_assets(self,date):

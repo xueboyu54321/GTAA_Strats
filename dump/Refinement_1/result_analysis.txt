@@ -3,6 +3,6 @@ Daily Volatility:0.73%
 Daily 99% VaR:-1.88%
 Sharpe Ratio:-14.0
 kurtosis:38.9
-Correlation with Benchmark:-0.66
-Beta:-0.46
+Correlation with Benchmark:-0.74
+Beta:-0.82
 Maximum Drawdown-0.25
