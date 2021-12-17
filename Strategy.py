@@ -51,7 +51,7 @@ class MyStrategy():
     def get_assets(self,date):
     #Get assets based signals
         sig = self.signal.loc[date]
-        if self.diversify:      # nd Refinement
+        if self.diversify:      # Check for 2nd Refinement
             stock = sig.loc[self.category['stock']]
             bond  = sig.loc[self.category['bond']]
             commo = sig.loc[self.category['commo']]
@@ -60,12 +60,13 @@ class MyStrategy():
             return mo.get_stocks(sig,0.25)
 
     def get_weights(self,assets):
-        if self.weight == "signal":
-            if self.diversify:
+        if self.weight == "signal": # Check for 1st Refinement
+            if self.diversify:      # Check for 2nd Refinement
                 stock_l,stock_s = assets[0]
                 bond_l , bond_s = assets[1]
                 commo_l,commo_s = assets[2]
 
+                #Signal Weighting
                 stock_median = pd.concat([stock_l,stock_s]).median()
                 stock_l-=stock_median
                 stock_s-=stock_median
@@ -98,8 +99,8 @@ class MyStrategy():
                 return np.abs(l_weight),np.abs(s_weight)
 
 
-        elif self.weight == "ef":
-            if self.diversify:
+        elif self.weight == "ef":  # Check for 1st Refinement
+            if self.diversify:     # Check for 2nd Refinement
                 stock_l,stock_s = assets[0]
                 bond_l , bond_s = assets[1]
                 commo_l,commo_s = assets[2]
@@ -121,7 +122,6 @@ class MyStrategy():
                 bond_s_weight = bond_weight.loc[bond_weight<0]
 
                 commo_data = self.data.loc[start_date:end_date][commo_list]
-
                 commo_weight,commo_P,stock_ret,commo_vol = ef.get_weights(commo_data)
                 commo_l_weight = commo_weight.loc[commo_weight>0]
                 commo_s_weight = commo_weight.loc[commo_weight<0]
@@ -150,28 +150,29 @@ class MyStrategy():
             sys.exit("Weighting method can only be 'signal' or 'ef', program terminated!\n ")
 
     def back_test(self):
+    # Do backtest
         signal_date = self.signal_date
         cnt = 0
-        net_value = [1,]
-        for i in range(1,len(signal_date)):
+        net_value = [1,]                    #Initialize a list to collect results
+        for i in range(1,len(signal_date)): #Loop through each day
             cost = 1
             today = signal_date[i]
             yesterday = signal_date[i-1]
-            if cnt == 0:
+            if cnt == 0:                    #Every 22 day, we adjust position
                 assets = self.get_assets(today)
                 l_weight,s_weight = self.get_weights(assets)
                 cost = (1-self.cost)
                 print("[Check]: Position adjusted on:",yesterday)
-            elif cnt ==22:
+            elif cnt ==22:                  #Reset counter
                 cnt = -1
             ret = self.data.loc[today]/self.data.loc[yesterday]-1
             l_ret = (ret.loc[l_weight.index]+1)*l_weight
             s_ret = (-1*ret.loc[s_weight.index]+1)*s_weight
 
+            #Compute returns for each day
             if self.weight=='ef':
                 net_weight = l_weight.sum()+s_weight.sum()
                 tot_ret = l_ret.sum()*(l_weight.sum()/net_weight) + s_ret.sum()*(l_weight.sum()/net_weight)
-
             else:
                 tot_ret = (l_ret.sum()+s_ret.sum())/2.0
 
@@ -179,9 +180,20 @@ class MyStrategy():
             cnt+=1
 
         self.ret = net_value
-            # 1.correlation; 2.beta;
         return net_value
+
     def get_stats(self):
+    # -------- get_stats ----------
+    # Goal: Compute Statistics
+    # Printout:
+    # ave_ret: average daily returns
+    # vol: Volatility
+    # Sharpe: Sharpe
+    # kurtosis
+    # 99% 1-day VaR
+    # corr: Correlation with benchmark
+    # beta: Beta with benchmark
+    # -----------------------------
         ret_rate = [self.ret[i]/self.ret[i-1]-1 for i in range(1,len(self.ret))]
         ave_ret,vol = sp.stats.norm.fit(ret_rate)
         Sharpe = (ave_ret-self.Libor.loc[self.date[-1]])/vol

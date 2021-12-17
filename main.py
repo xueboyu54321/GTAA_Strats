@@ -17,7 +17,10 @@ def get_args():
     # Run command:
     #         Basic strategy: python3 data.csv
     #         1st Refinement: python3 data.csv --ef (Run with efficient frontier)
-    #         2nd Refinement: python3 data.csv --
+    #         2nd Refinement: python3 data.csv --diversify (Make sure all types of assets to have a weight)
+    # Warning: In principle, --ef and --diversify could be compiled and run together but
+    #          this is not recommended since it is very likely to generate bug!
+    #-------------------------
     parser = argparse.ArgumentParser(formatter_class=RawTextHelpFormatter)
 
     parser.add_argument('file_path', type=str,
